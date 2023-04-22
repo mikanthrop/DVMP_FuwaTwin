@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import bpy
 
 # Parse the XML file
 tree = ET.parse('test.osm')
@@ -10,4 +11,4 @@ root = tree.getroot()
 for child in root:
     print(child.tag, child.attrib, "\n")
     for sub_child in child:
-        print(sub_child.tag, sub_child.text, "\n")
+        print(sub_child.tag, sub_child.text)
