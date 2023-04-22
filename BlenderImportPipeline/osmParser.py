@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as ET
+import bpy
 
 # Parse the XML file
 tree = ET.parse('test.osm')
