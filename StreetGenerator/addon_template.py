@@ -4,12 +4,13 @@ from bpy.props import FloatVectorProperty
 from bpy.types import Operator
 import bpy
 
+# Missing!: Allow users to reopen the properties panel
 
 bl_info = {
     "name": "Street Generator",
     "author": "Daniel Litterst and Leon Gobbert",
     "version": (1, 0),
-    "blender": (3, 50, 0),
+    "blender": (3, 5, 0),
     "location": "View3D > Add > Mesh > New Object",
     "description": "Adds a new Street Object",
     "warning": "",
@@ -41,7 +42,7 @@ def add_object(self, context):
     bpy.data.collections["Collection"].objects.link(street_object)
 
 
-class OBJECT_OT_add_object(Operator, AddObjectHelper):
+class OBJECT_OT_add_object(Operator):
     """Create a new Street Object"""
     bl_idname = "mesh.add_object"
     bl_label = "Add Street Object"
