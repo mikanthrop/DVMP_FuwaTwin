@@ -49,13 +49,13 @@ class OBJECT_OT_add_object(Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     scale: FloatVectorProperty(
-        name="scale",
+        name="Scale",
         default=(1.0, 1.0, 1.0),
         subtype='TRANSLATION',
         description="scaling",
     )
     rot_vec: FloatVectorProperty(
-        name='rotation02',
+        name='Rotation',
         default=(0, 0, 0),
         subtype='EULER',
         description='rotate the mesh',
