@@ -47,9 +47,9 @@ def add_object(self, context):
     # Store a shortcut to the curve object's data.
     obj_data = bpy.context.active_object.data
     # Which parts of the curve to extrude ['HALF', 'FRONT', 'BACK', 'FULL'].
-    obj_data.fill_mode = 'HALF'
+    # obj_data.fill_mode = 'HALF'
     # Breadth of extrusion.
-    obj_data.extrude = 0.125
+    # obj_data.extrude = 0.125cuts
     # Smoothness of the segments on the curve.
     obj_data.resolution_u = 20
     obj_data.render_resolution_u = 32
