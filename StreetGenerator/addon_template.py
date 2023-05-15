@@ -96,4 +96,4 @@ def unregister():
 
 
 if __name__ == "__main__":
-    register()
+    OBJECT_OT_add_object()
