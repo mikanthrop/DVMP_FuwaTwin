@@ -102,17 +102,18 @@ class OBJECT_OT_add_object(Operator):
     bl_label = "Add Street Object"
     bl_options = {'REGISTER', 'UNDO'}
 
+    def __init__(self) -> None:
+        super().__init__()
+
     start_point: FloatVectorProperty(
         name="Start Point",
         default=(0.0, 0.0, 0.0),
-        min=0.0,
         subtype='XYZ',
         description="Choose a point where the street should begin",
     )
     end_point: FloatVectorProperty(
         name="End Point",
         default=(4.0, 0.0, 0.0),
-        min=0.0,
         subtype='XYZ',
         description="Choose a point where the street should end",
     )
