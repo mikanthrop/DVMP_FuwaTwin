@@ -1,14 +1,18 @@
 # source (bc. I can't come up with that shit on my own...): https://behreajj.medium.com/scripting-curves-in-blender-with-python-c487097efd13
 # Missing (for the street to have basic functionality):
-# -Allow users to reopen the properties panel
-# -Scaling of Street-Curve
-# -Name of Object
-# -extrude along Y-Axis
+# - Link to collection not working properly
+# - Add Texture, depending on number of lanes
+# - Move origin to center of geometry
+
+# Features to add, to improve usability:
+# - Add option to generate a walkway => different texture and smaller width
+
+# Research:
+# - Geometry nodes
 
 
-from mathutils import Vector
-from bpy_extras.object_utils import AddObjectHelper, object_data_add
-from bpy.props import FloatVectorProperty, IntProperty
+import math
+from bpy.props import FloatVectorProperty, IntProperty, FloatProperty
 from bpy.types import Operator
 import bpy
 
@@ -27,33 +31,69 @@ bl_info = {
 
 
 def add_object(self, context):
-    scale_x = self.scale.x
-    scale_y = self.scale.y
-    cuts = self.cuts
+    # Create curve object
+    street_curve = bpy.data.curves.new('BezierCurve', 'CURVE')
+    street_curve.dimensions = '3D'
 
-    verts = [
-        Vector((-1 * scale_x, 1 * scale_y, 0)),
-        Vector((1 * scale_x, 1 * scale_y, 0)),
-        Vector((1 * scale_x, -1 * scale_y, 0)),
-        Vector((-1 * scale_x, -1 * scale_y, 0)),
-    ]
+    # Create a new spline for the curve
+    spline = street_curve.splines.new('BEZIER')
+    spline.bezier_points.add(self.cuts + 1)
 
-    edges = []
-    faces = [[0, 1, 2, 3]]
+    define_control_points(self.start_point, self.end_point, spline)
 
-    bpy.ops.curve.primitive_bezier_curve_add(enter_editmode=True)
-    bpy.ops.curve.subdivide(number_cuts=cuts)
-    street_curve = bpy.ops.curve
-    # Store a shortcut to the curve object's data.
-    obj_data = bpy.context.active_object.data
     # Which parts of the curve to extrude ['HALF', 'FRONT', 'BACK', 'FULL'].
-    obj_data.fill_mode = 'HALF'
-    # Breadth of extrusion.
-    obj_data.extrude = 0.125
-    # Smoothness of the segments on the curve.
-    obj_data.resolution_u = 20
-    obj_data.render_resolution_u = 32
-    bpy.ops.object.mode_set(mode='OBJECT')
+    street_curve.fill_mode = 'HALF'
+    # Breadth of extrusion, modified by lanes
+    street_curve.extrude = 0.125 * self.lanes
+    # create object out of curve
+    obj = bpy.data.objects.new('StreetObject', street_curve)
+    # Tilt curve by 90 degrees
+    obj.rotation_euler[0] = math.radians(90)
+    # Set origin right between start and end points
+    bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY')
+    # link to scene-collection
+    bpy.context.scene.collection.objects.link(obj)
+
+
+def define_control_points(start, end, spline):
+    # get step-size to distribute control points evenly between start and end
+    distance = end - start
+    step_size = distance / (len(spline.bezier_points) - 1)
+
+    handle_offset = step_size / 7
+
+    # Set control points for curve
+    for i in range(len(spline.bezier_points)):
+        if (i == 0):
+            spline.bezier_points[i].co = start
+            spline.bezier_points[i].handle_left = (
+                (start.x-handle_offset.x), (start.y-handle_offset.y), (start.z-handle_offset.z))
+            spline.bezier_points[i].handle_right = (
+                (start.x+handle_offset.x), (start.y+handle_offset.y), (start.z+handle_offset.z))
+        elif (i == (len(spline.bezier_points) - 1)):
+            spline.bezier_points[i].co = end
+            spline.bezier_points[i].handle_left = (
+                (end.x-handle_offset.x), (end.y-handle_offset.y), (end.z-handle_offset.z))
+            spline.bezier_points[i].handle_right = (
+                (end.x+handle_offset.x), (end.y+handle_offset.y), (end.z+handle_offset.z))
+        else:
+            current = step_size * i
+            spline.bezier_points[i].co = (current.x, current.y, current.z)
+            spline.bezier_points[i].handle_left = (
+                (current.x-handle_offset.x), (current.y-handle_offset.y), (current.z-handle_offset.z))
+            spline.bezier_points[i].handle_right = (
+                (current.x+handle_offset.x), (current.y+handle_offset.y), (current.z+handle_offset.z))
+
+
+def get_unit_vec(start, end, factor):
+    vec = end - start
+    vec_len = math.sqrt(math.pow(vec.x, 2) +
+                        math.pow(vec.y, 2)+math.pow(vec.z, 2))
+    if (vec_len == 0):
+        return (0, 0, 0)
+    else:
+        unit_vec = vec / vec_len
+        return unit_vec*factor
 
 
 class OBJECT_OT_add_object(Operator):
@@ -62,19 +102,36 @@ class OBJECT_OT_add_object(Operator):
     bl_label = "Add Street Object"
     bl_options = {'REGISTER', 'UNDO'}
 
-    scale: FloatVectorProperty(
-        name="Scale",
-        default=(1.0, 1.0, 1.0),
-        subtype='TRANSLATION',
-        description="scaling",
+    def __init__(self) -> None:
+        super().__init__()
+
+    start_point: FloatVectorProperty(
+        name="Start Point",
+        default=(0.0, 0.0, 0.0),
+        subtype='XYZ',
+        description="Choose a point where the street should begin",
+    )
+    end_point: FloatVectorProperty(
+        name="End Point",
+        default=(4.0, 0.0, 0.0),
+        subtype='XYZ',
+        description="Choose a point where the street should end",
+    )
+    lanes: IntProperty(
+        name="Lanes",
+        description="Number of lanes the street should have",
+        default=1,
+        min=1,
+        max=4,
+        subtype='UNSIGNED',
     )
     cuts: IntProperty(
-        name="Cuts",
-        description="Number of cuts along the street",
-        default=1,
-        min=0,
+        name="Control Points",
+        description="Number of control points between start and end point",
+        default=2,
+        min=1,
         max=100,
-        subtype='UNSIGNED'
+        subtype='UNSIGNED',
     )
 
     def execute(self, context):
