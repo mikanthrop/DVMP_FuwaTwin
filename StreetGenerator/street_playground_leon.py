@@ -1,14 +1,18 @@
 # source (bc. I can't come up with that shit on my own...): https://behreajj.medium.com/scripting-curves-in-blender-with-python-c487097efd13
+
 # Missing (for the street to have basic functionality):
-# - Link to collection not working properly
 # - Add Texture, depending on number of lanes
-# - Move origin to center of geometry
 
 # Features to add, to improve usability:
 # - Add option to generate a walkway => different texture and smaller width
+# - Integrate Decorations-options into my code
+
+# No idea how to do:
+# - Move origin to center of geometry
 
 # Research:
 # - Geometry nodes
+# - Plan how to design crossing-generation (all in one tool or two different ones?)
 
 
 import math
@@ -49,10 +53,14 @@ def add_object(self, context):
     obj = bpy.data.objects.new('StreetObject', street_curve)
     # Tilt curve by 90 degrees
     obj.rotation_euler[0] = math.radians(90)
-    # Set origin right between start and end points
-    bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY')
+    # Set origin right between start and end points (How tf does it work?!)
+
     # link to scene-collection
-    bpy.context.scene.collection.objects.link(obj)
+    collection = bpy.data.collections.get('Collection')
+    if (collection):
+        collection.objects.link(obj)
+    else:
+        bpy.context.scene.collection.objects.link(obj)
 
 
 def define_control_points(start, end, spline):
@@ -77,7 +85,8 @@ def define_control_points(start, end, spline):
             spline.bezier_points[i].handle_right = (
                 (end.x+handle_offset.x), (end.y+handle_offset.y), (end.z+handle_offset.z))
         else:
-            current = step_size * i
+            current = start + (step_size * i)
+            print(current)
             spline.bezier_points[i].co = (current.x, current.y, current.z)
             spline.bezier_points[i].handle_left = (
                 (current.x-handle_offset.x), (current.y-handle_offset.y), (current.z-handle_offset.z))
