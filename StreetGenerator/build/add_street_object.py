@@ -17,7 +17,8 @@ class Add_Object:
         spline = street_curve.splines.new('BEZIER')
         spline.bezier_points.add(self.cuts + 1)
 
-        Helper_Functions.define_control_points(self.start_point, self.end_point, spline)
+        Helper_Functions.define_control_points(
+            self.start_point, self.end_point, spline)
 
         # Which parts of the curve to extrude ['HALF', 'FRONT', 'BACK', 'FULL'].
         street_curve.fill_mode = 'HALF'
@@ -35,9 +36,6 @@ class Add_Object:
             collection.objects.link(obj)
         else:
             bpy.context.scene.collection.objects.link(obj)
-
-
-    
 
 
 class OBJECT_OT_add_object(Operator):
@@ -78,6 +76,6 @@ class OBJECT_OT_add_object(Operator):
         subtype='UNSIGNED',
     )
 
-    def execute(self):
+    def execute(self, context):
         Add_Object.add_object(self)
         return {'FINISHED'}
