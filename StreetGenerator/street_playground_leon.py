@@ -1,4 +1,4 @@
-# source (bc. I can't come up with that shit on my own...): https://behreajj.medium.com/scripting-curves-in-blender-with-python-c487097efd13
+# source: https://behreajj.medium.com/scripting-curves-in-blender-with-python-c487097efd13
 
 # Missing (for the street to have basic functionality):
 # - Add Texture, depending on number of lanes
@@ -6,6 +6,9 @@
 # Features to add, to improve usability:
 # - Add option to generate a walkway => different texture and smaller width
 # - Integrate Decorations-options into my code
+
+# Code-style:
+# - Turn into full addon-build (https://blender.stackexchange.com/questions/202570/multi-files-to-addon)
 
 # No idea how to do:
 # - Move origin to center of geometry
@@ -34,7 +37,7 @@ bl_info = {
 }
 
 
-def add_object(self, context):
+def add_object(self):
     # Create curve object
     street_curve = bpy.data.curves.new('BezierCurve', 'CURVE')
     street_curve.dimensions = '3D'
@@ -86,7 +89,6 @@ def define_control_points(start, end, spline):
                 (end.x+handle_offset.x), (end.y+handle_offset.y), (end.z+handle_offset.z))
         else:
             current = start + (step_size * i)
-            print(current)
             spline.bezier_points[i].co = (current.x, current.y, current.z)
             spline.bezier_points[i].handle_left = (
                 (current.x-handle_offset.x), (current.y-handle_offset.y), (current.z-handle_offset.z))
@@ -143,8 +145,8 @@ class OBJECT_OT_add_object(Operator):
         subtype='UNSIGNED',
     )
 
-    def execute(self, context):
-        add_object(self, context)
+    def execute(self):
+        add_object(self)
         return {'FINISHED'}
 
 
