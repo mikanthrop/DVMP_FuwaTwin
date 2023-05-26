@@ -38,6 +38,7 @@ bl_info = {
 
 
 def add_object(self):
+    
     # Create curve object
     street_curve = bpy.data.curves.new('BezierCurve', 'CURVE')
     street_curve.dimensions = '3D'
