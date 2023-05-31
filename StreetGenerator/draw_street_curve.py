@@ -51,22 +51,17 @@ def add_object(self, context):
     
 
 def assign_road_material(lanes):
-    # bpy.ops.material.new()
-    # mat = bpy.data.materials['Material']
-    # tex = bpy.data.textures.new("SomeName", 'IMAGE')
-    # slot = mat.texture_slots.add()
-    # slot.texture = tex
     road_mat = bpy.data.materials.new("Road Material")
     road_mat.use_nodes = True
-
     nodes = road_mat.node_tree.nodes
+
     imgpath = "/Users/leonprivat/Documents/GitHub/DVMP_FuwaTwin/StreetGenerator/build/textures/Road_texture.jpg"
     img = bpy.data.images.load(imgpath)
-    #setup the node_tree and links as you would manually on shader Editor
-    #to define an image texture for a material
+
     principled_BSDF = nodes.get('Principled BSDF')
     tex_node: bpy.types.Node = nodes.new('ShaderNodeTexImage')
     tex_node.image = img
+    
     road_mat.node_tree.links.new(tex_node.outputs[0], principled_BSDF.inputs[0])
     bpy.context.object.data.materials.append(road_mat)
 

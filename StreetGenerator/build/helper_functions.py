@@ -32,18 +32,20 @@ def define_control_points(start, end, spline):
                 (current.x+handle_offset.x), (current.y+handle_offset.y), (current.z+handle_offset.z))
             
 
-def assign_road_material(imgpath):
-    bpy.context.object.data.materials.append(None)
-    mat = bpy.context.active_object.material_slots[0].material
+def assign_road_material(lanes):
+    road_mat = bpy.data.materials.new("Road Material")
+    road_mat.use_nodes = True
+    nodes = road_mat.node_tree.nodes
+
+    imgpath = "/Users/leonprivat/Documents/GitHub/DVMP_FuwaTwin/StreetGenerator/build/textures/Road_texture.jpg"
     img = bpy.data.images.load(imgpath)
-    mat.use_nodes=True 
-    #setup the node_tree and links as you would manually on shader Editor
-    #to define an image texture for a material
-    material_output = mat.node_tree.nodes.get('Material Output')
-    principled_BSDF = mat.node_tree.nodes.get('Principled BSDF')
-    tex_node = mat.node_tree.nodes.new('ShaderNodeTexImage')
+
+    principled_BSDF = nodes.get('Principled BSDF')
+    tex_node: bpy.types.Node = nodes.new('ShaderNodeTexImage')
     tex_node.image = img
-    mat.node_tree.links.new(tex_node.outputs[0], principled_BSDF.inputs[0])
+    
+    road_mat.node_tree.links.new(tex_node.outputs[0], principled_BSDF.inputs[0])
+    bpy.context.object.data.materials.append(road_mat)
 
 
 

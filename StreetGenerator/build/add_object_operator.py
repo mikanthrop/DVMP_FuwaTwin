@@ -34,7 +34,7 @@ def add_object(self):
         bpy.ops.transform.tilt(value=1.5708, mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', 
                             proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False)
         # material
-        helper_functions.assign_road_material("./textures/Road_texture.jpg")
+        helper_functions.assign_road_material(self.lanes)
 
 class OBJECT_OT_add_object(Operator):
     """Create a new Street Object"""
