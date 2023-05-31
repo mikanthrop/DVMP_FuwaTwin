@@ -4,7 +4,6 @@ from bpy.props import FloatVectorProperty
 from bpy.types import Operator
 import bpy
 
-# Missing!: Allow users to reopen the properties panel
 
 bl_info = {
     "name": "Street Generator",

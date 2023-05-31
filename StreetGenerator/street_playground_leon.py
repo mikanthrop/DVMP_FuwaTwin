@@ -1,26 +1,5 @@
 # source: https://behreajj.medium.com/scripting-curves-in-blender-with-python-c487097efd13
 
-# Missing (for the street to have basic functionality):
-# - Draw a line -> street https://www.google.com/search?q=draw+a+line+and+generate+bezier+curve+blender#kpvalbx=_NKdwZNKgNumRxc8P4aWR0AM_32
-#    - Remove vertices of primitive-curve which is added at the beginning (select all - X - Vertices)
-# - Add Texture, depending on number of lanes
-#   - https://www.youtube.com/watch?v=CawzHMXaCw4
-#   - maybe rotate texture image
-
-# Features to add, to improve usability:
-# - Add option to generate a walkway => different texture and smaller width
-# - Integrate Decorations-options into my code
-
-# Code-style:
-# - Turn into full addon-build (https://blender.stackexchange.com/questions/202570/multi-files-to-addon)
-
-# No idea how to do:
-# - Move origin to center of geometry
-
-# Research:
-# - Geometry nodes
-# - Plan how to design crossing-generation (all in one tool or two different ones?)
-
 
 import math
 from bpy.props import FloatVectorProperty, IntProperty, FloatProperty
