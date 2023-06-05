@@ -20,6 +20,9 @@ bl_info = {
 def add_object(self, context):
     bpy.ops.curve.primitive_bezier_curve_add(radius=1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
     bpy.ops.object.editmode_toggle()
+    bpy.ops.curve.select_all(action='SELECT')
+    bpy.ops.transform.tilt(value=1.5708, mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', 
+                           proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False)
     bpy.ops.wm.tool_set_by_id(name="builtin.draw")
 
     # delete primitive curves' vertices, so only the drawn splines of the user will be used
@@ -43,9 +46,6 @@ def add_object(self, context):
     # rename
     # .....
     # tilt
-    bpy.ops.curve.select_all(action='SELECT')
-    bpy.ops.transform.tilt(value=1.5708, mirror=False, use_proportional_edit=False, proportional_edit_falloff='SMOOTH', 
-                           proportional_size=1, use_proportional_connected=False, use_proportional_projected=False, snap=False)
     # material
     assign_road_material(self.lanes)
     
