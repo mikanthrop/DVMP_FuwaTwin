@@ -36,7 +36,6 @@ class OSM_IMPORT(Operator):
     filepath: StringProperty(subtype="FILE_PATH")
 
     
-
     def execute(self, context):
         if self.filepath:
            osm_file = import_osm_file(self.filepath)
