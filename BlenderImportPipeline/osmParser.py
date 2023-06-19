@@ -48,6 +48,14 @@ class OSMParser():
                 x += 1
             y += 1
 
+    def loadBuildingMesh():
+        """
+        Import the building mesh 
+        """
+        building_mesh_path = "BlenderImportPipeline\buildingMesh\Flasche.obj"
+        bpy.ops.import_scene.obj(filepath=building_mesh_path)
+        building_object = bpy.context.selectable_objects[0]
+
     def building_edge_exists(self, v1, v2):
         """
         Checks if a building edge already exists. Bruteforce bug fix, thus relatively computationally expensive.
