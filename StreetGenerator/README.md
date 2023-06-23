@@ -4,10 +4,9 @@
 - Deko Gegenstände in Options-Panel auswählen lassen
 
 # Leon
-- Tilt um 90 Grad im Code durchführen
-- Bessere Textur für Straße finden / oder stretch entfernen
+- Textur auf Kurve muss passen -> UV unwrap, mapping, ....
 - Textur je nach Anzahl an Spuren u. Straßentyp ändern
-
+- evtl. mit Geometry nodes (https://www.youtube.com/watch?v=MHWjhIr50f0&t=193s + https://www.youtube.com/watch?v=Is8Qu7onvzM)
 # Beide
 - aus mehereren Dateien inklusive assets wie modellen und texturen zip-Datei Addon erstellen
 - Code von Daniel integrieren
