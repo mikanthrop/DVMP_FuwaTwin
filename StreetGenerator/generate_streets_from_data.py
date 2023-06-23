@@ -38,8 +38,6 @@ def add_object(self):
     street_curve.extrude = 0.125 * self.lanes
     # create object out of curve
     obj = bpy.data.objects.new('StreetObject', street_curve)
-    # Tilt curve by 90 degrees
-    obj.rotation_euler[0] = math.radians(90)
     # Set origin right between start and end points (How tf does it work?!)
 
     # link to scene-collection
@@ -59,6 +57,7 @@ def define_control_points(start, end, spline):
 
     # Set control points for curve
     for i in range(len(spline.bezier_points)):
+        spline.bezier_points[i].tilt = 1.5708 # tilt each spline by 90 degrees
         if (i == 0):
             spline.bezier_points[i].co = start
             spline.bezier_points[i].handle_left = (
