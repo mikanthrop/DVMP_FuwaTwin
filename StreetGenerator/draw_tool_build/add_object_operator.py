@@ -45,7 +45,7 @@ def add_object(self):
 
             if curve == street_curve:
                 # add decorations
-                add_decoration.add_decoration(self, street_curve)
+                # add_decoration.add_decoration(self, street_curve)
                 for spline in curve.splines:
                     
                     if spline.type != 'BEZIER':
