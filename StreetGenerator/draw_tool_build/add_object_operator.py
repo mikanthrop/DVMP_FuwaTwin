@@ -2,6 +2,7 @@ import bpy
 from bpy.props import IntProperty, BoolProperty
 from bpy.types import Operator
 from . import helper_functions
+from . import add_decoration
 
 
 def add_object(self):
@@ -43,6 +44,8 @@ def add_object(self):
         for curve in bpy.data.curves:
 
             if curve == street_curve:
+                # add decorations
+                add_decoration.add_decoration(self, street_curve)
                 for spline in curve.splines:
                     
                     if spline.type != 'BEZIER':
