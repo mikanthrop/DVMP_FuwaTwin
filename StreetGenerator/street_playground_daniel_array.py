@@ -63,7 +63,7 @@ def add_object(self):
     # obj.rotation_euler[0] = math.radians(90)
     # Set origin right between start and end points (How tf does it work?!)
 
-    # Create bezier circle and randomize.
+    # # Create bezier circle and randomize.
     bpy.ops.curve.primitive_bezier_curve_add(enter_editmode=True)
     bpy.ops.curve.subdivide(number_cuts=4)
     # bpy.ops.transform.vertex_random(offset=1.0, uniform=0.1, normal=0, seed=0)
@@ -72,25 +72,31 @@ def add_object(self):
     curve = bpy.context.active_object
 
     ############ Cubes #############
-
-    # bpy.ops.mesh.primitive_monkey_add(calc_uvs=True, size=0.1)
     # Create cube.
-    bpy.ops.mesh.primitive_circle_add(calc_uvs=True, size=0.1) ######### ADD SINGLE VERT OR AN EMPTY
+    bpy.ops.mesh.primitive_plane_add(calc_uvs=True, size=0.1)
     plane1 = bpy.context.active_object
+    # bpy.ops.object.mode_set(mode='EDIT')
+    # bpy.ops.mesh.merge(type='CENTER')
+    # bpy.ops.object.mode_set(mode='OBJECT')
+
     bpy.ops.wm.obj_import(filepath="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/Tree.obj",
                           directory="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/", files=[{"name": "Tree.obj", "name": "Tree.obj"}])
     tree1 = bpy.context.active_object
+    #tree1.rotation_euler = (90, 0, 0)
     tree1.scale = (0.1, 0.1, 0.1)
     tree1.parent = plane1
     tree1.hide_set(True)
     plane1.instance_type = 'FACES'
 
-
     bpy.ops.mesh.primitive_plane_add(calc_uvs=True, size=0.1)
     plane2 = bpy.context.active_object
+    # bpy.ops.object.mode_set(mode='EDIT')
+    # bpy.ops.mesh.merge(type='CENTER')
+    # bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.wm.obj_import(filepath="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/Tree.obj",
                           directory="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/", files=[{"name": "Tree.obj", "name": "Tree.obj"}])
     tree2 = bpy.context.active_object
+
     tree2.scale = (0.1, 0.1, 0.1)
     tree2.parent = plane2
     tree2.hide_set(True)
@@ -114,9 +120,6 @@ def add_object(self):
     curve_mod1.deform_axis = 'POS_X'
 
     plane1.location[1] = 0.5
-    tree1.location[1] = 0.5
-
-    # tree1.location[1] = self.tree_offset * 0.1
 
     array_mod2 = plane2.modifiers.new(name='Array', type='ARRAY')
     curve_mod2 = plane2.modifiers.new(name='Curve', type='CURVE')
@@ -125,8 +128,6 @@ def add_object(self):
     array_mod2.fit_type = 'FIT_CURVE'
     array_mod2.curve = curve
     array_mod2.use_relative_offset = True
-    # array_mod2.relative_offset_displace = (self.tree_distance, 0.0, 0.0) # Adjust the offset values here (x, y, z).
-    # Adjust the offset values here (x, y, z).
     array_mod2.relative_offset_displace = (3, 0.0, 0.0)
 
     # Curve modifier properties.
@@ -134,64 +135,6 @@ def add_object(self):
     curve_mod2.deform_axis = 'POS_X'
 
     plane2.location[1] = -0.5
-    tree2.location[1] = -0.5
-    # tree2.location[1] = self.tree_offset * -0.1
-
-    # ####### Trees #######
-
-    # # create Tree
-    # bpy.ops.wm.obj_import(filepath="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/Tree.obj", directory="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/", files=[{"name":"Tree.obj", "name":"Tree.obj"}])
-    # tree1 = bpy.context.active_object
-    # tree1.scale = (0.1, 0.1, 0.1)
-    # bpy.ops.wm.obj_import(filepath="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/Tree.obj", directory="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/", files=[{"name":"Tree.obj", "name":"Tree.obj"}])
-    # tree2 = bpy.context.active_object
-    # tree2.scale = (0.1, 0.1, 0.1)
-    # # tree2.size = 0.1
-
-    # # bpy.ops.mesh.primitive_plane_add(size=0.1, enter_editmode=False, align='WORLD', location=(0, 0, 0), scale=(1, 1, 1))
-    # # plane1 = bpy.context.active_object
-    # # plane1.scale = (0.1, 0.1, 0.1)
-    # # tree1.parent = plane1
-
-    # # Append modifiers.
-    # array_mod1 = tree1.modifiers.new(name='Array', type='ARRAY')
-    # curve_mod1 = tree1.modifiers.new(name='Curve', type='CURVE')
-
-    # # Array modifier properties.
-    # array_mod1.fit_type = 'FIT_CURVE'
-    # array_mod1.curve = curve
-    # array_mod1.use_relative_offset = True
-    # # array_mod1.relative_offset_displace = (self.tree_distance, 0.0, 0.0) # Adjust the offset values here (x, y, z).
-    # array_mod1.relative_offset_displace = (3, 0.0, 0.0) # Adjust the offset values here (x, y, z).
-    # array_mod1.count
-
-    # # Curve modifier properties.
-    # curve_mod1.object = curve
-    # curve_mod1.deform_axis = 'POS_X'
-
-    # tree1.location[1] = 0.5
-    # # tree1.location[1] = self.tree_offset * 0.1
-
-    # array_mod2 = tree2.modifiers.new(name='Array', type='ARRAY')
-    # curve_mod2 = tree2.modifiers.new(name='Curve', type='CURVE')
-
-    # # Array modifier properties.
-    # array_mod2.fit_type = 'FIT_CURVE'
-    # array_mod2.curve = curve
-    # array_mod2.use_relative_offset = True
-    # # array_mod2.relative_offset_displace = (self.tree_distance, 0.0, 0.0) # Adjust the offset values here (x, y, z).
-    # array_mod2.relative_offset_displace = (3, 0.0, 0.0) # Adjust the offset values here (x, y, z).
-
-    # # Curve modifier properties.
-    # curve_mod2.object = curve
-    # curve_mod2.deform_axis = 'POS_X'
-
-    # tree2.location[1] = -0.5
-    # # tree2.location[1] = self.tree_offset * -0.1
-
-
-
-
 
     # Apply modifiers and separate the Objects
     # bpy.ops.object.modifier_apply(modifier="Array")
@@ -200,16 +143,6 @@ def add_object(self):
     # bpy.ops.object.mode_set(mode='OBJECT')
 
     # bpy.ops.object.select_all(action='DESELECT')
-
-    # cubes_array = []
-    # # Iterate through all objects in the scene
-    # for obj in bpy.data.objects:
-    #     # Check if the object's name contains the word "Cube"
-    #     if "Cube" in obj.name:
-    #         bpy.ops.wm.obj_import(filepath="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/Tree.obj", directory="C:/GitHub/DVMP_FuwaTwin/StreetGenerator/", files=[{"name":"Tree.obj", "name":"Tree.obj"}])
-    #         tree = bpy.context.active_object
-    #         tree.scale = (0.1, 0.1, 0.1)
-    #         tree.location = obj.location
 
 
 def get_unit_vec(start, end, factor):
