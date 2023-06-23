@@ -1,25 +1,11 @@
 import bpy
 from bpy.types import Operator, Panel
 from bpy.props import StringProperty
-import osmParser
+from . import osmParser
 
-
-bl_info = {
-    "name": "OSM Map Import",
-    "author": "Alexander Weibert, Hau-David Nguyen, Marie Cleppien",
-    "version": (1, 0),
-    "blender": (2, 93, 0),
-    "location": "File > Import > OSM (.osm)",
-    "description": "Imports Open Street View Map into Blender",
-    "warning": "",
-    "doc_url": "",
-    "category": "Import",
-}
 
 def import_osm_file(self, filepath):
     print("Importing OSM file:", filepath)
-
-    # Import OSM file
     bpy.ops.import_scene.osm(filepath=filepath)
 
 def import_asc_file(filepath):
@@ -27,8 +13,8 @@ def import_asc_file(filepath):
     bpy.ops.import_scene.asc(filepath=filepath)
 
 # Operator
-class OSM_IMPORT(Operator):
-    """OSM File Import"""
+class OSM_OT_ImportOperator(Operator):
+    """Import a OSM File"""
     bl_idname = "import_scene.osm"
     bl_label = "Import OSM."
     bl_description = "Import an OSM file."
@@ -50,8 +36,8 @@ class OSM_IMPORT(Operator):
         return {'RUNNING_MODAL'}
     
 # Operator
-class ASC_IMPORT(Operator):
-    """ASC File Import"""
+class ASC_OT_ImportOperator(Operator):
+    """Import a ASC File"""
     bl_idname = "import_scene.asc"
     bl_label = "Import ASC."
     bl_description = "Import an ASC file."
@@ -70,9 +56,8 @@ class ASC_IMPORT(Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
-
 # Panel
-class IMPORT_PANEL(Panel):
+class IMPORT_PT_ImportPanel(Panel):
     bl_idname = "IMPORT_PT_import_panel"
     bl_label = "Import ASC and OSM Files."
     bl_space_type = 'VIEW_3D'
@@ -91,21 +76,21 @@ class IMPORT_PANEL(Panel):
         row.operator("import_scene.asc", icon='FILE_FOLDER')
 
 # Register
-classes = [
-    OSM_IMPORT,
-    ASC_IMPORT,
-    IMPORT_PANEL
-]
+# classes = [
+#     OSM_IMPORT,
+#     ASC_IMPORT,
+#     IMPORT_PANEL
+# ]
 
-def register():
-    for cls in classes:
-        bpy.utils.register_class(cls)
-
-
-def unregister():
-    for cls in classes:
-        bpy.utils.unregister_class(cls)
+# def register():
+#     for cls in classes:
+#         bpy.utils.register_class(cls)
 
 
-if __name__ == "__main__":
-    register()
+# def unregister():
+#     for cls in classes:
+#         bpy.utils.unregister_class(cls)
+
+
+# if __name__ == "__main__":
+#     register()
