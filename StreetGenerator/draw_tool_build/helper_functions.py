@@ -54,13 +54,13 @@ def assign_road_material(walkway, lanes):
         imgpath = (script_dir / "textures/walk_path.jpg")
     else:
         if lanes == 1:
-            imgpath = (script_dir / "textures/Road_texture.jpg")
+            imgpath = (script_dir / "textures/one_lane.jpg")
         elif lanes == 2:
-            imgpath = (script_dir / "textures/Road_texture.jpg")
+            imgpath = (script_dir / "textures/two_lane.jpg")
         elif lanes == 3:
-            imgpath = (script_dir / "textures/Road_texture.jpg")
+            imgpath = (script_dir / "textures/four_lane.png")
         elif lanes == 4:
-            imgpath = (script_dir / "textures/Road_texture.jpg")
+            imgpath = (script_dir / "textures/four_lane.png")
 
     img = bpy.data.images.load(imgpath.__str__())
 
@@ -72,10 +72,11 @@ def assign_road_material(walkway, lanes):
     tex_coord = nodes.new(type='ShaderNodeTexCoord')
     tex_mapping: bpy.types.ShaderNodeMapping = nodes.new(type='ShaderNodeMapping')
     tex_mapping.vector_type = 'TEXTURE'
+    tex_mapping.inputs[3].default_value = (0.01, 1.0, 1.0)
 
     # link it all together
     links = road_mat.node_tree.links
-    links.new(tex_coord.outputs["UV"], tex_mapping.inputs["Scale"])
+    links.new(tex_coord.outputs["UV"], tex_mapping.inputs["Vector"])
     links.new(tex_mapping.outputs["Vector"], tex_node.inputs["Vector"])
     links.new(tex_node.outputs[0], diffuse.inputs[0])
     links.new( diffuse.outputs['BSDF'], output.inputs['Surface'] )

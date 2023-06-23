@@ -58,14 +58,16 @@ def add_object(self):
                         # Modify the tilt by 90 degrees
                         point.tilt = 1.5708  # 90 degrees in radians
         
-                # make a mesh, to assign material easier
-                mesh_obj = helper_functions.covert_to_mesh(obj)
-                # remove curve from scene
-                # make mesh_obj the active object
-                # link to scene
-                helper_functions.link_to_collection(mesh_obj)
+                # # make a mesh, to assign material easier
+                # mesh_obj = helper_functions.covert_to_mesh(obj)
+                # # remove curve from scene
+                # # make mesh_obj the active object
+                # # link to scene
+                # helper_functions.link_to_collection(mesh_obj)
                 # assign material
                 helper_functions.assign_road_material(self.walkway, self.lanes)
+                # back to object mode
+                bpy.ops.object.editmode_toggle()
 
 
     # Register the handler function
