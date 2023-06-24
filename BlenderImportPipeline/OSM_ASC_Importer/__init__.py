@@ -11,28 +11,23 @@ bl_info = {
 }
 
 import bpy
-from .osm_asc_importer import OSM_OT_ImportOperator
-from .osm_asc_importer import ASC_OT_ImportOperator
+from .osm_asc_importer import OSM_ASC_OT_ImportOperator
 from .osm_asc_importer import IMPORT_PT_ImportPanel
 
-def menu_func_osm_import(self, context):
-    self.layout.operator(OSM_OT_ImportOperator.bl_idname, text="OpenStreetMap (.osm)")
+def menu_func_osm_asc_import(self, context):
+    self.layout.operator(OSM_ASC_OT_ImportOperator.bl_idname, text="OpenStreetMap (.osm) & Arc ASCII Grid (.asc)")
 
-def menu_func_asc_import(self, context):
-    self.layout.operator(ASC_OT_ImportOperator.bl_idname, text="Arc ASCII Grid (.asc)")
+# def menu_func_asc_import(self, context):
+#     self.layout.operator(ASC_OT_ImportOperator.bl_idname, text="Arc ASCII Grid (.asc)")
 
 def register():
-    bpy.utils.register_class(OSM_OT_ImportOperator)
-    bpy.types.TOPBAR_MT_file_import.append(menu_func_osm_import)
-    bpy.utils.register_class(ASC_OT_ImportOperator)
-    bpy.types.TOPBAR_MT_file_import.append(menu_func_asc_import)
+    bpy.utils.register_class(OSM_ASC_OT_ImportOperator)
+    bpy.types.TOPBAR_MT_file_import.append(menu_func_osm_asc_import)
     bpy.utils.register_class(IMPORT_PT_ImportPanel)
     
 def unregister():
-    bpy.utils.unregister_class(OSM_OT_ImportOperator)
-    bpy.types.TOPBAR_MT_file_import.remove(menu_func_osm_import)
-    bpy.utils.unregister_class(ASC_OT_ImportOperator)
-    bpy.types.TOPBAR_MT_file_import.remove(menu_func_asc_import)
+    bpy.utils.unregister_class(OSM_ASC_OT_ImportOperator)
+    bpy.types.TOPBAR_MT_file_import.remove(menu_func_osm_asc_import)
     bpy.utils.unregister_class(IMPORT_PT_ImportPanel)
 
 if __name__ == "__main__":
