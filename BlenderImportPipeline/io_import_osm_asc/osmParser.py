@@ -26,7 +26,6 @@ class OSMParser():
         self.allowed = ["building", "highway"]
         
         filepath = get_script_dir() / "example_data/map.osm"
-        print(filepath)
         self.tree = ET.parse(filepath)
         # self.tree = ET.parse("BlenderImportPipeline/OSM_ASC_Importer/example_data/map.osm")
 
@@ -36,7 +35,6 @@ class OSMParser():
         Loads height data from terrainData.asc.
         """
         filepath = get_script_dir() / "example_data/terrainData.asc"
-        print(filepath.__str__())
         file = open(filepath.__str__())
         # file = open("BlenderImportPipeline/OSM_ASC_Importer/example_data/terrainData.asc")
         lines = file.readlines()
@@ -65,7 +63,6 @@ class OSMParser():
         Import the building mesh 
         """
         filepath = get_script_dir() / "example_data/Flasche.obj"
-        print(filepath)
         building_mesh_path = filepath
         # building_mesh_path = "BlenderImportPipeline/OSM_ASC_Importer/example_data/Flasche.obj"
         bpy.ops.import_scene.obj(filepath=building_mesh_path)

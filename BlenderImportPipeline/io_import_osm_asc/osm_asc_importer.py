@@ -19,14 +19,14 @@ class OSM_ASC_OT_ImportOperator(Operator):
     bl_description = "Import an OSM and ASC file"
     bl_options = {'REGISTER', 'UNDO'}
 
-    filepath_osm: StringProperty(
-        subtype="FILE_PATH", 
-        name="OSM File"
-        )
-    filepath_asc: StringProperty(
-        subtype="FILE_PATH", 
-        name="ASC File"
-        )
+    # filepath_osm: StringProperty(
+    #     subtype="FILE_PATH", 
+    #     name="OSM File"
+    #     )
+    # filepath_asc: StringProperty(
+    #     subtype="FILE_PATH", 
+    #     name="ASC File"
+    #     )
 
     scalingFactor: FloatProperty(
         name="Scaling Factor",
@@ -37,15 +37,24 @@ class OSM_ASC_OT_ImportOperator(Operator):
         subtype='UNSIGNED',
     )
 
+    storeyHeight: FloatProperty(
+        name="Storey Height",
+        description="Height of one storey",
+        default=2.4,
+        min=1,
+        max=10,
+        subtype='UNSIGNED'
+    )
+
     def execute(self, context):
         # osm_file = self.filepath_osm
         # asc_file = self.filepath_asc
+        # Call the osmParser function with the OSM and ASC file paths
+        # osmParser(osm_file, asc_file)
         print("parsing osm file")
         parser = osmParser.OSMParser()
         parser.parse()
 
-        # Call the osmParser function with the OSM and ASC file paths
-        # osmParser(osm_file, asc_file)
 
         return {'FINISHED'}
 

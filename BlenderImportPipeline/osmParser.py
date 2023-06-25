@@ -2,6 +2,11 @@ import xml.etree.ElementTree as ET
 import bpy
 import bmesh
 import math
+import pathlib
+
+def get_script_dir(): 
+    script_dir = pathlib.Path(__file__).resolve().parent
+    return script_dir
 
 class OSMParser():
 
@@ -19,14 +24,16 @@ class OSMParser():
         self.forbidden = ["forest", "meadow", "park", "grassland"]
         self.allowed = ["building", "highway"]
         
-        self.tree = ET.parse("BlenderImportPipeline/testMaps/map.osm")
+        filepath = get_script_dir() / "io_import_osm_asc/example_data/map.osm"
+        self.tree = ET.parse(filepath.__str__())
 
 
     def loadTerrain(self):
         """
         Loads height data from terrainData.asc.
         """
-        file = open("BlenderImportPipeline/terrain/terrainData.asc")
+        filepath = get_script_dir() / "io_import_osm_asc/example_data/terrainData.asc"
+        file = open(filepath.__str__())
         lines = file.readlines()
 
         self.ncols = int(lines[0].split()[-1])
@@ -48,16 +55,20 @@ class OSMParser():
                 x += 1
             y += 1
 
-    def loadBuildingMesh(self,lat,lon,height,scale =(10,10,10)):
+    def loadBuildingMesh(self,lat,lon,height):
         """
         Import the building mesh 
         """
-        building_mesh_path = ("BlenderImportPipeline\\buildingMesh\\Flasche.obj")
+        filepath_building = get_script_dir() / "io_import_osm_asc/example_data/Flasche.obj"
+        building_mesh_path = filepath_building.__str__()
         bpy.ops.import_scene.obj(filepath=building_mesh_path)
         building_object = bpy.context.selectable_objects[0]
         building_object.location = (lat,lon,height)
         #building_object.rotation_euler = rotation
+        scale = (44.44,19.66,57.85)
+        rotation = 1.206, -0.315, 0.0
         building_object.scale = scale
+        building_object.rotation_euler = rotation
         bpy.context.view_layer.objects.active = building_object
         bpy.ops.object.origin_set(type='GEOMETRY_ORIGIN')
         return building_object
