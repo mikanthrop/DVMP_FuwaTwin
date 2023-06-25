@@ -4,7 +4,6 @@
 - Deko Gegenstände in Options-Panel auswählen lassen
 
 # Leon
-- Bug wenn weitere Straßen eingefügt werden...
 - evtl. mit Geometry nodes (https://www.youtube.com/watch?v=MHWjhIr50f0&t=193s + https://www.youtube.com/watch?v=Is8Qu7onvzM)
 # Beide
 - aus mehereren Dateien inklusive assets wie modellen und texturen zip-Datei Addon erstellen
