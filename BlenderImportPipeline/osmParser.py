@@ -159,19 +159,20 @@ class OSMParser():
                 tags = child.findall("tag")
                 allowedFound = False
                 tagString = ""
+                levels = 1
                 for t in tags:
                     value = t.get("k")
                     if value in self.allowed:
                         allowedFound = True
                         tagString = value
-                        break
+                    elif value == "building:levels":
+                        #print(value)
+                        levels = int(t.get("v"))
                 if allowedFound:
                     nodeRefs = child.findall("nd")
                     usedNodes = []
                     newObject = True
                     
-
-                    firstIndexFound = False
                     firstIndex = 0
 
                     for nd in nodeRefs:
@@ -190,24 +191,27 @@ class OSMParser():
                             mappedHgt = -float(mappedHgt)
                             
                             if tagString == "building":
-                                if nodeRef not in usedNodes:
-                                    usedNodes.append(nodeRef)
-                                    self.buildingObject.verts.new((fittedLat, fittedLon, mappedHgt))
+                                #if nodeRef not in usedNodes:
+                                usedNodes.append(nodeRef)
+                                for i in range(2):
+                                    self.buildingObject.verts.new((fittedLat, fittedLon, mappedHgt - i * levels))
                                     buildingIndex += 1
-                                    if not firstIndexFound:
-                                        firstIndex = buildingIndex
-                                if not newObject:
-                                    self.buildingObject.verts.ensure_lookup_table()
-                                    if not self.building_edge_exists(self.buildingObject.verts[buildingIndex - 1], self.buildingObject.verts[buildingIndex]):
-                                        self.buildingObject.edges.new((self.buildingObject.verts[buildingIndex - 1], self.buildingObject.verts[buildingIndex]))
+                                    if i > 0:
+                                        self.buildingObject.verts.ensure_lookup_table()
+                                        if not self.building_edge_exists(self.buildingObject.verts[buildingIndex - 1], self.buildingObject.verts[buildingIndex]):
+                                            self.buildingObject.edges.new((self.buildingObject.verts[buildingIndex - 1], self.buildingObject.verts[buildingIndex]))
+                                        if not newObject and not self.building_edge_exists(self.buildingObject.verts[buildingIndex - 2], self.buildingObject.verts[buildingIndex]):
+                                            self.buildingObject.edges.new((self.buildingObject.verts[buildingIndex - 2], self.buildingObject.verts[buildingIndex]))
 
                             elif tagString == "highway":
-                                if nodeRef not in usedNodes:
-                                    usedNodes.append(nodeRef)
-                                    self.streetObject.verts.new((fittedLat, fittedLon, mappedHgt))
-                                    streetIndex += 1
+                                #if nodeRef not in usedNodes:
+                                usedNodes.append(nodeRef)
+                                self.streetObject.verts.new((fittedLat, fittedLon, mappedHgt))
+                                streetIndex += 1
                                 if not newObject:
+                                    #self.add_object(fittedLat, fittedLon, 0)
                                     self.streetObject.verts.ensure_lookup_table()
+                                    
                                     if not self.street_edge_exists(self.streetObject.verts[streetIndex - 1], self.streetObject.verts[streetIndex]):
                                         self.streetObject.edges.new((self.streetObject.verts[streetIndex - 1], self.streetObject.verts[streetIndex]))
                             newObject = False
@@ -215,9 +219,10 @@ class OSMParser():
                             if tagString == "building":
                                 self.buildingObject.verts.ensure_lookup_table()
                                 if not self.building_edge_exists(self.buildingObject.verts[firstIndex], self.buildingObject.verts[buildingIndex]):
-                                    self.buildingObject.edges.new((self.buildingObject.verts[firstIndex], self.buildingObject.verts[buildingIndex - 1]))
+                                    self.buildingObject.edges.new((self.buildingObject.verts[firstIndex], self.buildingObject.verts[buildingIndex]))
 
                 else:
+
                     continue
 
         street = bpy.data.meshes.new("streets")
@@ -235,5 +240,64 @@ class OSMParser():
         bpy.context.view_layer.objects.active = buildingob
 
 
+    def define_control_points(self, start, end, spline):
+        # get step-size to distribute control points evenly between start and end
+        distance = end - start
+        step_size = distance / (len(spline.bezier_points) - 1)
+
+        handle_offset = step_size / 7
+
+        # Set control points for curve
+        for i in range(len(spline.bezier_points)):
+            spline.bezier_points[i].tilt = 1.5708 # tilt each spline by 90 degrees
+            if (i == 0):
+                spline.bezier_points[i].co = start
+                spline.bezier_points[i].handle_left = (
+                    (start.x-handle_offset.x), (start.y-handle_offset.y), (start.z-handle_offset.z))
+                spline.bezier_points[i].handle_right = (
+                    (start.x+handle_offset.x), (start.y+handle_offset.y), (start.z+handle_offset.z))
+            elif (i == (len(spline.bezier_points) - 1)):
+                spline.bezier_points[i].co = end
+                spline.bezier_points[i].handle_left = (
+                    (end.x-handle_offset.x), (end.y-handle_offset.y), (end.z-handle_offset.z))
+                spline.bezier_points[i].handle_right = (
+                    (end.x+handle_offset.x), (end.y+handle_offset.y), (end.z+handle_offset.z))
+            else:
+                current = start + (step_size * i)
+                spline.bezier_points[i].co = (current.x, current.y, current.z)
+                spline.bezier_points[i].handle_left = (
+                    (current.x-handle_offset.x), (current.y-handle_offset.y), (current.z-handle_offset.z))
+                spline.bezier_points[i].handle_right = (
+                    (current.x+handle_offset.x), (current.y+handle_offset.y), (current.z+handle_offset.z))
+                
+    def add_object(self, start_point, end_point, cuts):
+        
+        # Create curve object
+        street_curve = bpy.data.curves.new('BezierCurve', 'CURVE')
+        street_curve.dimensions = '3D'
+
+        # Create a new spline for the curve
+        spline = street_curve.splines.new('BEZIER')
+        spline.bezier_points.add(cuts + 1)
+
+        self.define_control_points(start_point, end_point, spline)
+
+        # Which parts of the curve to extrude ['HALF', 'FRONT', 'BACK', 'FULL'].
+        street_curve.fill_mode = 'HALF'
+        # Breadth of extrusion, modified by lanes
+        street_curve.extrude = 0.125
+        # create object out of curve
+        obj = bpy.data.objects.new('StreetObject', street_curve)
+        # Set origin right between start and end points (How tf does it work?!)
+
+        # link to scene-collection
+        collection = bpy.data.collections.get('Collection')
+        if (collection):
+            collection.objects.link(obj)
+        else:
+            bpy.context.scene.collection.objects.link(obj)
+
+
+    
 parser = OSMParser()
 parser.parse()
