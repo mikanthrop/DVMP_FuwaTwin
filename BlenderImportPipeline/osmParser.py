@@ -55,7 +55,7 @@ class OSMParser():
                 x += 1
             y += 1
 
-    def loadBuildingMesh(self,lat,lon,height,scale =(10,10,10)):
+    def loadBuildingMesh(self,lat,lon,height):
         """
         Import the building mesh 
         """
@@ -65,7 +65,10 @@ class OSMParser():
         building_object = bpy.context.selectable_objects[0]
         building_object.location = (lat,lon,height)
         #building_object.rotation_euler = rotation
+        scale = (44.44,19.66,57.85)
+        rotation = 1.206, -0.315, 0.0
         building_object.scale = scale
+        building_object.rotation_euler = rotation
         bpy.context.view_layer.objects.active = building_object
         bpy.ops.object.origin_set(type='GEOMETRY_ORIGIN')
         return building_object
