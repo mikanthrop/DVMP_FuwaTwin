@@ -133,7 +133,7 @@ def create_road_material():
     road_mat.use_nodes = True
     nodes = road_mat.node_tree.nodes
 
-    imgpath = "C:/Users/Le_go/Documents/GitHub/DVMP_FuwaTwin/StreetGenerator/draw_tool_build/textures/four_lane.png"
+    imgpath = "C:/Users/Le_go/Documents/GitHub/DVMP_FuwaTwin/StreetGenerator/draw_tool_geonodes_build/textures/four_lane.png"
     img = bpy.data.images.load(imgpath)
 
     principled_BSDF = nodes.get('Principled BSDF')

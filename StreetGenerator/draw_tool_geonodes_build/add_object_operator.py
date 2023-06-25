@@ -20,6 +20,8 @@ def add_object(self):
             else:
                 pass
 
+    # higher resolution = cleaner curves
+    street_curve.resolution_u = 40
     # create object out of curve
     obj = bpy.data.objects.new('Street', street_curve)
     # link to scene-collection and select obj
@@ -41,7 +43,8 @@ def add_object(self):
 
         helper_functions.build_geometry_node_tree(obj, self.walkway, self.lanes, self.scaleFactor)
 
-        # helper_functions.deselect_curve_controls(street_curve)
+        # deselect all curve controls
+        helper_functions.deselect_all_curves()
         # back to object mode
         bpy.ops.object.editmode_toggle()
 

@@ -1,5 +1,5 @@
 import bpy
-from bpy.props import IntProperty, BoolProperty
+from bpy.props import IntProperty, BoolProperty, FloatProperty
 from bpy.types import Operator
 from . import helper_functions
 from . import add_decoration
@@ -20,12 +20,14 @@ def add_object(self):
             else:
                 pass
 
+    # higher resolution = cleaner curves
+    street_curve.resolution_u = 40
     # Which parts of the curve to extrude ['HALF', 'FRONT', 'BACK', 'FULL'].
     street_curve.fill_mode = 'HALF'
     # Breadth of extrusion, modified by lanes
     if self.lanes == 3:
-        street_curve.extrude = .4
-    street_curve.extrude = .1 * self.lanes
+        street_curve.extrude = 4
+    street_curve.extrude = 1 * self.lanes * self.scaleFactor
     # create object out of curve
     obj = bpy.data.objects.new('Street', street_curve)
     # link to scene-collection
@@ -68,6 +70,9 @@ def add_object(self):
                         point.select_control_point = False
                         point.select_left_handle = False
                         point.select_right_handle = False
+                
+                # back to object mode
+                bpy.ops.object.editmode_toggle()
         
 
 
@@ -98,6 +103,15 @@ class OBJECT_OT_add_object(Operator):
         min=1,
         max=4,
         subtype='UNSIGNED',
+    )
+
+    scaleFactor: FloatProperty(
+        name="Scale Factor",
+        description="Scale width of street",
+        default=0.1,
+        min=0.1,
+        max=10.0,
+        step=0.1
     )
 
     def execute(self, context):

@@ -126,6 +126,7 @@ def get_unit_vec(start, end, factor):
     
 
 def deselect_all_curves():
+    # deselect all curves in the scene
     for curve in bpy.data.curves:
         for spline in curve.splines:
             

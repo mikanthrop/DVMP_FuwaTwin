@@ -1,6 +1,5 @@
 # source: https://behreajj.medium.com/scripting-curves-in-blender-with-python-c487097efd13
 
-
 import math
 from bpy.props import FloatVectorProperty, IntProperty, FloatProperty
 from bpy.types import Operator
