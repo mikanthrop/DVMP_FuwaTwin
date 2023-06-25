@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Operator, Panel
-from bpy.props import StringProperty
+from bpy.props import StringProperty, FloatProperty
 from . import osmParser
 
 def import_osm_file(self, filepath):
@@ -19,12 +19,27 @@ class OSM_ASC_OT_ImportOperator(Operator):
     bl_description = "Import an OSM and ASC file"
     bl_options = {'REGISTER', 'UNDO'}
 
-    filepath_osm: StringProperty(subtype="FILE_PATH", name="OSM File")
-    filepath_asc: StringProperty(subtype="FILE_PATH", name="ASC File")
+    filepath_osm: StringProperty(
+        subtype="FILE_PATH", 
+        name="OSM File"
+        )
+    filepath_asc: StringProperty(
+        subtype="FILE_PATH", 
+        name="ASC File"
+        )
+
+    scalingFactor: FloatProperty(
+        name="Scaling Factor",
+        description="Scaling of the imported scene",
+        default=10000,
+        min=1,
+        max=1000000,
+        subtype='UNSIGNED',
+    )
 
     def execute(self, context):
-        osm_file = self.filepath_osm
-        asc_file = self.filepath_asc
+        # osm_file = self.filepath_osm
+        # asc_file = self.filepath_asc
         print("parsing osm file")
         parser = osmParser.OSMParser()
         parser.parse()
@@ -34,26 +49,5 @@ class OSM_ASC_OT_ImportOperator(Operator):
 
         return {'FINISHED'}
 
-
 def menu_func_import(self, context):
     self.layout.operator(OSM_ASC_OT_ImportOperator.bl_idname, text="OpenStreetMap and ASC (.osm, .asc)")
-
-
-# Panel
-class IMPORT_PT_ImportPanel(Panel):
-    bl_idname = "IMPORT_PT_import_panel"
-    bl_label = "Import ASC and OSM Files."
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_category = 'Tool'
-
-    def draw(self, context):
-        layout = self.layout
-
-        row = layout.row()
-        row.label(text="Import OSM File:")
-        row.operator("import_scene.osm", icon='FILE_FOLDER')
-        
-        row = layout.row()
-        row.label(text="Import ASC File:")
-        row.operator("import_scene.asc", icon='FILE_FOLDER')

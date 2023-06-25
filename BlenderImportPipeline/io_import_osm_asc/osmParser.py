@@ -2,6 +2,12 @@ import xml.etree.ElementTree as ET
 import bpy
 import bmesh
 import math
+import pathlib
+
+def get_script_dir(): 
+    script_dir = pathlib.Path(__file__).resolve().parent
+    return script_dir
+
 
 class OSMParser():
 
@@ -19,14 +25,20 @@ class OSMParser():
         self.forbidden = ["forest", "meadow", "park", "grassland"]
         self.allowed = ["building", "highway"]
         
-        self.tree = ET.parse("BlenderImportPipeline/testMaps/map.osm")
+        filepath = get_script_dir() / "example_data/map.osm"
+        print(filepath)
+        self.tree = ET.parse(filepath)
+        # self.tree = ET.parse("BlenderImportPipeline/OSM_ASC_Importer/example_data/map.osm")
 
 
     def loadTerrain(self):
         """
         Loads height data from terrainData.asc.
         """
-        file = open("BlenderImportPipeline/terrain/terrainData.asc")
+        filepath = get_script_dir() / "example_data/terrainData.asc"
+        print(filepath.__str__())
+        file = open(filepath.__str__())
+        # file = open("BlenderImportPipeline/OSM_ASC_Importer/example_data/terrainData.asc")
         lines = file.readlines()
 
         self.ncols = int(lines[0].split()[-1])
@@ -48,13 +60,16 @@ class OSMParser():
                 x += 1
             y += 1
 
-    def loadBuildingMesh():
+    def loadBuildingMesh(self):
         """
         Import the building mesh 
         """
-        building_mesh_path = "BlenderImportPipeline\buildingMesh\Flasche.obj"
+        filepath = get_script_dir() / "example_data/Flasche.obj"
+        print(filepath)
+        building_mesh_path = filepath
+        # building_mesh_path = "BlenderImportPipeline/OSM_ASC_Importer/example_data/Flasche.obj"
         bpy.ops.import_scene.obj(filepath=building_mesh_path)
-        building_object = bpy.context.selectable_objects[0]
+        self.buildingObject = bpy.context.selectable_objects[0]
 
     def building_edge_exists(self, v1, v2):
         """
@@ -140,6 +155,8 @@ class OSMParser():
         firstNodeLocation = ()
         scalingFactor = 100000
 
+
+
         # Iterate over the child elements of the root
         for child in root:
             if (child.tag == "node"):
@@ -219,6 +236,7 @@ class OSMParser():
 
                 else:
                     continue
+        self.loadBuildingMesh()
 
         street = bpy.data.meshes.new("streets")
         self.streetObject.to_mesh(street)
