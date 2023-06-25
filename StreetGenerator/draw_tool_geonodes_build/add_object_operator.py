@@ -28,6 +28,7 @@ def add_object(self):
     collection = bpy.data.collections.get('Collection')
     if (collection):
         collection.objects.link(obj)
+        # add_decoration.add_decoration(self, street_curve)
     else:
         bpy.context.scene.collection.objects.link(obj)
 
