@@ -2,6 +2,11 @@ import xml.etree.ElementTree as ET
 import bpy
 import bmesh
 import math
+import pathlib
+
+def get_script_dir(): 
+    script_dir = pathlib.Path(__file__).resolve().parent
+    return script_dir
 
 class OSMParser():
 
@@ -19,14 +24,16 @@ class OSMParser():
         self.forbidden = ["forest", "meadow", "park", "grassland"]
         self.allowed = ["building", "highway"]
         
-        self.tree = ET.parse("BlenderImportPipeline/testMaps/map.osm")
+        filepath = get_script_dir() / "io_import_osm_asc/example_data/map.osm"
+        self.tree = ET.parse(filepath.__str__())
 
 
     def loadTerrain(self):
         """
         Loads height data from terrainData.asc.
         """
-        file = open("BlenderImportPipeline/terrain/terrainData.asc")
+        filepath = get_script_dir() / "io_import_osm_asc/example_data/terrainData.asc"
+        file = open(filepath.__str__())
         lines = file.readlines()
 
         self.ncols = int(lines[0].split()[-1])
@@ -52,7 +59,8 @@ class OSMParser():
         """
         Import the building mesh 
         """
-        building_mesh_path = ("BlenderImportPipeline\\buildingMesh\\Flasche.obj")
+        filepath_building = get_script_dir() / "io_import_osm_asc/example_data/Flasche.obj"
+        building_mesh_path = filepath_building.__str__()
         bpy.ops.import_scene.obj(filepath=building_mesh_path)
         building_object = bpy.context.selectable_objects[0]
         building_object.location = (lat,lon,height)
