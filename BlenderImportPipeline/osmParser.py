@@ -48,13 +48,19 @@ class OSMParser():
                 x += 1
             y += 1
 
-    def loadBuildingMesh():
+    def loadBuildingMesh(self,lat,lon,height,scale =(10,10,10)):
         """
         Import the building mesh 
         """
-        building_mesh_path = "BlenderImportPipeline\buildingMesh\Flasche.obj"
+        building_mesh_path = ("BlenderImportPipeline\\buildingMesh\\Flasche.obj")
         bpy.ops.import_scene.obj(filepath=building_mesh_path)
         building_object = bpy.context.selectable_objects[0]
+        building_object.location = (lat,lon,height)
+        #building_object.rotation_euler = rotation
+        building_object.scale = scale
+        bpy.context.view_layer.objects.active = building_object
+        bpy.ops.object.origin_set(type='GEOMETRY_ORIGIN')
+        return building_object
 
     def building_edge_exists(self, v1, v2):
         """
@@ -126,6 +132,7 @@ class OSMParser():
 
 
     def parse(self):
+        ghb_found = False
         """
         Parse osm file and generate blender objects.
         """
@@ -149,6 +156,18 @@ class OSMParser():
                     lat = child.attrib.get("lat")
                     lon = child.attrib.get("lon")
                     firstNodeLocation = (float(lat), float(lon))
+
+                # Added GHB Location
+                
+                    ghb_lat = 48.047495152
+                    ghb_lon = 8.209267348
+                    fittedgbhLat = (ghb_lat - firstNodeLocation[0]) * scalingFactor
+                    fittedgbhLon = (ghb_lon - firstNodeLocation[1]) * scalingFactor
+                    cube_height = self.calculate_height(ghb_lat, ghb_lon)
+                    cube_mappedHgt = -float(cube_height)
+                  # bpy.ops.mesh.primitive_cube_add(size=1, location=(fittedgbhLat, fittedgbhLon, cube_mappedHgt))
+
+                    self.loadBuildingMesh(fittedgbhLat,fittedgbhLon,cube_mappedHgt)
 
                 # Store key and value pairs
                 keyString = child.attrib.get("id")
@@ -174,6 +193,7 @@ class OSMParser():
                     newObject = True
                     
                     firstIndex = 0
+
 
                     for nd in nodeRefs:
                         nodeRef = nd.get("ref")
@@ -231,7 +251,7 @@ class OSMParser():
         streetob = bpy.data.objects.new("StreetObject", street)
         bpy.context.scene.collection.objects.link(streetob)
         bpy.context.view_layer.objects.active = streetob
-
+        
         building = bpy.data.meshes.new("buildings")
         self.buildingObject.to_mesh(building)
         self.buildingObject.free()
