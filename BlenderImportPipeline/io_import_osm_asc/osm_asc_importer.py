@@ -10,12 +10,13 @@ bl_info = {
     "category": "Import",
 }
 
-import bpy 
+import bpy
 from bpy.types import Operator, Panel, PropertyGroup
 from bpy.props import FloatProperty, BoolProperty
 from . import osmParser
 
 class OSM_ASC_Properties(PropertyGroup):
+    """Properties for the OSM and ASC import"""
     scalingFactor: FloatProperty(
         name="Scaling Factor",
         description="Scaling of the imported scene",
@@ -57,6 +58,7 @@ class OSM_ASC_OT_ImportOperator(Operator):
     
 
 class OSM_ASC_PT_Panel(Panel):
+    """Creates a Sidepanel in the 3D View"""
     bl_idname = "OSM_ASC_PT_Panel"
     bl_label = "OSM and ASC Importer"
     bl_space_type = 'VIEW_3D'
@@ -65,7 +67,6 @@ class OSM_ASC_PT_Panel(Panel):
 
     def draw(self, context):
         layout = self.layout
-        obj = context.object
         props = context.scene.osm_asc_props
         
         layout.row().label(text="FuWaTwin Config")
