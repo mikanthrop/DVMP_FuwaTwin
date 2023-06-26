@@ -49,7 +49,7 @@ class OSM_ASC_OT_ImportOperator(Operator):
     highlightHFU: BoolProperty(
         name="Highlight HFU",
         description="Highlights HFU buildings",
-        default=False
+        default=True
     )
 
     def execute(self, context):
