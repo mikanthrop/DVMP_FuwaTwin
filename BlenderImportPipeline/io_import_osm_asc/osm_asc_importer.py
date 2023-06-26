@@ -1,6 +1,6 @@
 import bpy
 from bpy.types import Operator, Panel
-from bpy.props import StringProperty, FloatProperty
+from bpy.props import StringProperty, FloatProperty, BoolProperty
 from . import osmParser
 
 def import_osm_file(self, filepath):
@@ -46,17 +46,44 @@ class OSM_ASC_OT_ImportOperator(Operator):
         subtype='UNSIGNED'
     )
 
+    highlightHFU: BoolProperty(
+        name="Highlight HFU",
+        description="Highlights HFU buildings",
+        default=False
+    )
+
     def execute(self, context):
         # osm_file = self.filepath_osm
         # asc_file = self.filepath_asc
         # Call the osmParser function with the OSM and ASC file paths
         # osmParser(osm_file, asc_file)
         print("parsing osm file")
-        parser = osmParser.OSMParser()
+        parser = osmParser.OSMParser(self.storeyHeight, self.scalingFactor, self.highlightHFU)
         parser.parse()
 
 
         return {'FINISHED'}
 
+# This allows you to right click on a button and link to documentation
+def add_object_manual_map():
+    url_manual_prefix = "https://docs.blender.org/manual/en/latest/"
+    url_manual_mapping = (
+        ("bpy.ops.mesh.add_object", "scene_layout/object/types.html"),
+    )
+    return url_manual_prefix, url_manual_mapping
+
+def register():
+    bpy.utils.register_class(OSM_ASC_OT_ImportOperator)
+    bpy.utils.register_manual_map(add_object_manual_map)
+    #bpy.types.VIEW3D_MT_mesh_add.append(add_object_button)
+
+def unregister():
+    bpy.utils.unregister_class(OSM_ASC_OT_ImportOperator)
+    bpy.utils.unregister_manual_map(add_object_manual_map)
+    #bpy.types.VIEW3D_MT_mesh_add.remove(add_object_button)
+
 def menu_func_import(self, context):
     self.layout.operator(OSM_ASC_OT_ImportOperator.bl_idname, text="OpenStreetMap and ASC (.osm, .asc)")
+
+if __name__ == "__main__":
+    OSM_ASC_OT_ImportOperator()

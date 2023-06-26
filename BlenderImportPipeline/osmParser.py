@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as ET
 import bpy
+import numpy as np
 import bmesh
 import math
 import pathlib
@@ -10,7 +11,10 @@ def get_script_dir():
 
 class OSMParser():
 
-    def __init__(self):
+    def __init__(self, storeyHeight, scalingFactor, highlightHFU):
+        self.storeyHeight = storeyHeight
+        self.scalingFactor = scalingFactor
+        self.highlightHFU = highlightHFU
         self.minLat = 0
         self.minLon = 0
         self.cellSize = 0
@@ -18,13 +22,16 @@ class OSMParser():
 
         self.loadTerrain()
 
-        self.streetObject = bmesh.new()
+        self.streetCollection = bpy.data.collections.new("StreetCollection")
+        bpy.context.scene.collection.children.link(self.streetCollection)
+
+        self.streetObject = bpy.data.objects.new('Street', None)
         self.buildingObject = bmesh.new()
         
         self.forbidden = ["forest", "meadow", "park", "grassland"]
         self.allowed = ["building", "highway"]
         
-        filepath = get_script_dir() / "io_import_osm_asc/example_data/map.osm"
+        filepath = get_script_dir() / "io_import_osm_asc/example_data/smol.osm"
         self.tree = ET.parse(filepath.__str__())
 
 
@@ -66,7 +73,7 @@ class OSMParser():
         building_object.location = (lat,lon,height)
         #building_object.rotation_euler = rotation
         scale = (44.44,19.66,57.85)
-        rotation = 1.206, -0.315, 0.0
+        rotation = 1.206, -0.315, math.pi
         building_object.scale = scale
         building_object.rotation_euler = rotation
         bpy.context.view_layer.objects.active = building_object
@@ -139,7 +146,7 @@ class OSMParser():
         area3 = dist2 * dist3
         area4 = dist1 * dist3
 
-        return area1 * heightv1 + area2 * heightv2 + area3 * heightv3 + area4 * heightv4
+        return (area1 * heightv1 + area2 * heightv2 + area3 * heightv3 + area4 * heightv4) - int(self.terrainMap[30][12])
 
 
     def parse(self):
@@ -174,12 +181,13 @@ class OSMParser():
                     ghb_lon = 8.209267348
                     fittedgbhLat = (ghb_lat - firstNodeLocation[0]) * scalingFactor
                     fittedgbhLon = (ghb_lon - firstNodeLocation[1]) * scalingFactor
-                    cube_height = self.calculate_height(ghb_lat, ghb_lon)
-                    cube_mappedHgt = -float(cube_height)
-                  # bpy.ops.mesh.primitive_cube_add(size=1, location=(fittedgbhLat, fittedgbhLon, cube_mappedHgt))
+                    ghbHeight = self.calculate_height(ghb_lat, ghb_lon)
+                    cube_mappedHgt = ghbHeight
+                    #bpy.ops.mesh.primitive_cube_add(size=1, location=(fittedgbhLat, fittedgbhLon, cube_mappedHgt))
 
                     self.loadBuildingMesh(fittedgbhLat,fittedgbhLon,cube_mappedHgt)
-
+                    obj = bpy.context.active_object
+                    obj.name = "Flasche"
                 # Store key and value pairs
                 keyString = child.attrib.get("id")
                 valueString = child.attrib.get(
@@ -190,6 +198,7 @@ class OSMParser():
                 allowedFound = False
                 tagString = ""
                 levels = 1
+
                 for t in tags:
                     value = t.get("k")
                     if value in self.allowed:
@@ -198,13 +207,19 @@ class OSMParser():
                     elif value == "building:levels":
                         #print(value)
                         levels = int(t.get("v"))
+                    elif value == "name" and t.get("v") == "Großhausberg 9":
+                        allowedFound = False
+                        
                 if allowedFound:
                     nodeRefs = child.findall("nd")
                     usedNodes = []
+                    roadCoords = []
                     newObject = True
                     
                     firstIndex = 0
 
+                    roof = []
+                    wall = []
 
                     for nd in nodeRefs:
                         nodeRef = nd.get("ref")
@@ -219,60 +234,82 @@ class OSMParser():
                                         firstNodeLocation[1]) * scalingFactor
                             
                             mappedHgt = self.calculate_height(lat, lon)
-                            mappedHgt = -float(mappedHgt)
+                            mappedHgt = float(mappedHgt)
                             
+                            helper = 0
+
                             if tagString == "building":
                                 #if nodeRef not in usedNodes:
                                 usedNodes.append(nodeRef)
                                 for i in range(2):
-                                    self.buildingObject.verts.new((fittedLat, fittedLon, mappedHgt - i * levels))
+                                    self.buildingObject.verts.new((fittedLat, fittedLon, mappedHgt + i * levels * self.storeyHeight))
                                     buildingIndex += 1
+                                    self.buildingObject.verts.ensure_lookup_table()
+                                    wall.append(self.buildingObject.verts[buildingIndex])
                                     if i > 0:
                                         self.buildingObject.verts.ensure_lookup_table()
                                         if not self.building_edge_exists(self.buildingObject.verts[buildingIndex - 1], self.buildingObject.verts[buildingIndex]):
                                             self.buildingObject.edges.new((self.buildingObject.verts[buildingIndex - 1], self.buildingObject.verts[buildingIndex]))
                                         if not newObject and not self.building_edge_exists(self.buildingObject.verts[buildingIndex - 2], self.buildingObject.verts[buildingIndex]):
                                             self.buildingObject.edges.new((self.buildingObject.verts[buildingIndex - 2], self.buildingObject.verts[buildingIndex]))
-
+                                    if i == 1:
+                                        roof.append(self.buildingObject.verts[buildingIndex])
+                                    if wall.__len__() == 4 and usedNodes.count(usedNodes) != 2:
+                                        self.buildingObject.faces.new([wall[0], wall[1], wall[3], wall[2]])
+                                        wall = [wall[2], wall[3]]
                             elif tagString == "highway":
                                 #if nodeRef not in usedNodes:
                                 usedNodes.append(nodeRef)
-                                self.streetObject.verts.new((fittedLat, fittedLon, mappedHgt))
+                                roadCoords.append(np.array((fittedLat, fittedLon, mappedHgt)))
                                 streetIndex += 1
                                 if not newObject:
-                                    #self.add_object(fittedLat, fittedLon, 0)
-                                    self.streetObject.verts.ensure_lookup_table()
-                                    
-                                    if not self.street_edge_exists(self.streetObject.verts[streetIndex - 1], self.streetObject.verts[streetIndex]):
-                                        self.streetObject.edges.new((self.streetObject.verts[streetIndex - 1], self.streetObject.verts[streetIndex]))
+                                    self.add_object(roadCoords[-2], roadCoords[-1], 0)
+
                             newObject = False
+
                         else:
-                            if tagString == "building":
-                                self.buildingObject.verts.ensure_lookup_table()
-                                if not self.building_edge_exists(self.buildingObject.verts[firstIndex], self.buildingObject.verts[buildingIndex]):
-                                    self.buildingObject.edges.new((self.buildingObject.verts[firstIndex], self.buildingObject.verts[buildingIndex]))
+                            continue
+                    roadCoords = []
+                    if tagString == "building":
+                            self.buildingObject.faces.new(roof)
 
-                else:
+        # street = bpy.data.meshes.new("streets")
+        # self.streetObject.to_mesh(street)
+        # self.streetObject.free()
+        # streetob = bpy.data.objects.new("StreetObject", street)
+        # bpy.context.scene.collection.objects.link(streetob)
+        # bpy.context.view_layer.objects.active = streetob
 
-                    continue
-
-        street = bpy.data.meshes.new("streets")
-        self.streetObject.to_mesh(street)
-        self.streetObject.free()
-        streetob = bpy.data.objects.new("StreetObject", street)
-        bpy.context.scene.collection.objects.link(streetob)
-        bpy.context.view_layer.objects.active = streetob
-        
         building = bpy.data.meshes.new("buildings")
         self.buildingObject.to_mesh(building)
         self.buildingObject.free()
         buildingob = bpy.data.objects.new("BuildingObject", building)
         bpy.context.scene.collection.objects.link(buildingob)
-        bpy.context.view_layer.objects.active = buildingob
+
+        bpy.ops.object.select_all(action='DESELECT')
+        flasche = None
+        # Mirror every object along the y,z axis
+        for obj in bpy.context.scene.objects:
+            obj.select_set(True)
+        
+        bpy.ops.transform.mirror(orient_type='LOCAL', orient_matrix=((1, 0, 0), (0, 1, 0), (0, 0, 1)), orient_matrix_type='LOCAL', constraint_axis=(False, True, False))
+
+
+        #bpy.ops.object.delete()
+        #obj.select_set(False)
+        # buildingob.select_set(True)
+        # bpy.ops.object.mode_set(mode='EDIT')
+        # bpy.ops.mesh.select_all(action='SELECT')
+        # bpy.ops.mesh.edge_face_add()
+
+        # # Switch back to object mode
+        # bpy.ops.object.mode_set(mode='OBJECT')
 
 
     def define_control_points(self, start, end, spline):
         # get step-size to distribute control points evenly between start and end
+        #print("LAMO\n")
+
         distance = end - start
         step_size = distance / (len(spline.bezier_points) - 1)
 
@@ -284,25 +321,25 @@ class OSMParser():
             if (i == 0):
                 spline.bezier_points[i].co = start
                 spline.bezier_points[i].handle_left = (
-                    (start.x-handle_offset.x), (start.y-handle_offset.y), (start.z-handle_offset.z))
+                    (start[0]-handle_offset[0]), (start[1]-handle_offset[1]), (start[2]-handle_offset[2]))
                 spline.bezier_points[i].handle_right = (
-                    (start.x+handle_offset.x), (start.y+handle_offset.y), (start.z+handle_offset.z))
+                    (start[0]+handle_offset[0]), (start[1]+handle_offset[1]), (start[2]+handle_offset[2]))
             elif (i == (len(spline.bezier_points) - 1)):
                 spline.bezier_points[i].co = end
                 spline.bezier_points[i].handle_left = (
-                    (end.x-handle_offset.x), (end.y-handle_offset.y), (end.z-handle_offset.z))
+                    (end[0]-handle_offset[0]), (end[1]-handle_offset[1]), (end[2]-handle_offset[2]))
                 spline.bezier_points[i].handle_right = (
-                    (end.x+handle_offset.x), (end.y+handle_offset.y), (end.z+handle_offset.z))
+                    (end[0]+handle_offset[0]), (end[1]+handle_offset[1]), (end[2]+handle_offset[2]))
             else:
                 current = start + (step_size * i)
-                spline.bezier_points[i].co = (current.x, current.y, current.z)
+                spline.bezier_points[i].co = (current[0], current[1], current[2])
                 spline.bezier_points[i].handle_left = (
-                    (current.x-handle_offset.x), (current.y-handle_offset.y), (current.z-handle_offset.z))
+                    (current[0]-handle_offset[0]), (current[1]-handle_offset[1]), (current[2]-handle_offset[2]))
                 spline.bezier_points[i].handle_right = (
-                    (current.x+handle_offset.x), (current.y+handle_offset.y), (current.z+handle_offset.z))
+                    (current[0]+handle_offset[0]), (current[1]+handle_offset[1]), (current[2]+handle_offset[2]))
                 
     def add_object(self, start_point, end_point, cuts):
-        
+
         # Create curve object
         street_curve = bpy.data.curves.new('BezierCurve', 'CURVE')
         street_curve.dimensions = '3D'
@@ -311,24 +348,32 @@ class OSMParser():
         spline = street_curve.splines.new('BEZIER')
         spline.bezier_points.add(cuts + 1)
 
+        # Define control points for the spline
         self.define_control_points(start_point, end_point, spline)
 
-        # Which parts of the curve to extrude ['HALF', 'FRONT', 'BACK', 'FULL'].
+        # Set fill mode and extrusion
         street_curve.fill_mode = 'HALF'
-        # Breadth of extrusion, modified by lanes
-        street_curve.extrude = 0.125
-        # create object out of curve
+        street_curve.extrude = 0.5
+
+
+        # Create an object from the curve
         obj = bpy.data.objects.new('StreetObject', street_curve)
-        # Set origin right between start and end points (How tf does it work?!)
-
-        # link to scene-collection
-        collection = bpy.data.collections.get('Collection')
-        if (collection):
-            collection.objects.link(obj)
-        else:
-            bpy.context.scene.collection.objects.link(obj)
-
-
-    
-parser = OSMParser()
-parser.parse()
+        self.streetCollection.objects.link(obj)
+   
+    def link_street_curves(self):
+        """
+        Link street curves to one curve. Not used, as the outcome is unusable.
+        """
+        for obj in self.streetCollection.objects:
+            obj.select_set(True)
+        bpy.context.view_layer.objects.active = self.streetCollection.objects[0]
+        bpy.ops.object.join()
+        
+    def merge_objects(self):
+        """
+        Merge all street objects together. Takes too long to execute, but increases performance once finished.
+        """
+        ctx = bpy.context.copy()
+        ctx["active_object"] = self.streetCollection.objects[0]
+        ctx["selected_editable_objects"] = self.streetCollection.objects
+        bpy.ops.object.join(ctx)
