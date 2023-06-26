@@ -28,7 +28,6 @@ def add_object(self):
     collection = bpy.data.collections.get('Collection')
     if (collection):
         collection.objects.link(obj)
-        # add_decoration.add_decoration(self, street_curve)
     else:
         bpy.context.scene.collection.objects.link(obj)
 
@@ -43,6 +42,7 @@ def add_object(self):
         bpy.app.handlers.depsgraph_update_post.clear()
 
         helper_functions.build_geometry_node_tree(obj, self.walkway, self.lanes, self.scaleFactor)
+        add_decoration.add_decoration(self, obj)
 
         # deselect all curve controls
         helper_functions.deselect_all_curves()
