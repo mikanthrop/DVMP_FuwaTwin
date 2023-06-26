@@ -30,7 +30,7 @@ class OSMParser():
         
         self.allowed = ["building", "highway"]
         
-        filepath = filepath = os.path.join(getScriptDir(), "example_data", "map.osm")
+        filepath = os.path.join(getScriptDir(), "example_data", "map.osm")
         self.tree = ET.parse(filepath.__str__())
 
         self.hfuMaterial = bpy.data.materials.new(name="HFU")
@@ -284,7 +284,7 @@ class OSMParser():
         bpy.context.view_layer.objects.active = buildingob
         
         # Append two materials, so the second index used previously is used for HFU buildings.
-        buildingob.data.materials.append("wall")
+        buildingob.data.materials.append(self.wallMaterial)
         buildingob.data.materials.append(self.hfuMaterial)
 
         bpy.ops.object.select_all(action='DESELECT')
@@ -365,6 +365,3 @@ class OSMParser():
         ctx["active_object"] = self.streetCollection.objects[0]
         ctx["selected_editable_objects"] = self.streetCollection.objects
         bpy.ops.object.join(ctx)
-
-p = OSMParser(2.5, 100000, True)
-p.parse()
