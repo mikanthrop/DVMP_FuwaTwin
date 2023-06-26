@@ -101,6 +101,10 @@ def add_decoration(self, curve):
                 obj.select_set(True)
                 bpy.ops.object.delete()
 
+            if obj.parent:
+                print("old tree")
+                continue
+
             obj.parent = curve
             obj.select_set(True)
             obj.rotation_euler[1] = 0
